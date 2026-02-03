@@ -5,9 +5,11 @@ from pathlib import Path
 from tqdm import tqdm
 import heapq
 import argparse
+import matplotlib.pyplot as plt
 
 from maze2d import Maze2DEnv
-from dataset import TrajectoryDataset
+from utils.trajectory import TrajectoryDataset
+from utils.visualization import plot_maze, plot_trajectory
 
 
 def continuous_to_grid(pos, resolution=50):
@@ -18,7 +20,7 @@ def continuous_to_grid(pos, resolution=50):
 
 
 def grid_to_continuous(grid_pos, resolution=50):
-    # Convert grid coordinates to continuous position.
+    # Convert grid coordinates to continuous position (center of each discrete cell)
     return np.array([(grid_pos[0] + 0.5) / resolution, (grid_pos[1] + 0.5) / resolution])
 
 
@@ -72,8 +74,9 @@ def astar(start, goal, env, resolution=50):
             while current in came_from:
                 current = came_from[current]
                 path.append(current)
-            return path[::-1]
+            return path[::-1] # flip list since it is built from goal -> start
 
+        # Explore the 8 candidate neighbors
         for dx, dy in neighbors:
             neighbor = (current[0] + dx, current[1] + dy)
 
@@ -85,7 +88,7 @@ def astar(start, goal, env, resolution=50):
             if not is_valid_grid_pos(neighbor, env, resolution):
                 continue
 
-            # Diagonal movement costs more
+            # Diagonal movement costs more (sq(2) vs 1)
             move_cost = 1.414 if dx != 0 and dy != 0 else 1.0
             tentative_g = g_score[current] + move_cost
 
@@ -245,6 +248,18 @@ def main():
 
     TrajectoryDataset.save(trajectories, args.output)
     print(f"Saved to {args.output}")
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+    plot_maze(env.walls, env.start_region, env.goal_region, ax=ax)
+
+    # Plot a few sample trajectories to visualize the kind of data being used
+    for i in range(min(10, len(trajectories))):
+        traj = trajectories[i]  # (transition_dim, horizon)
+        plot_trajectory(traj, state_dim=2, ax=ax, alpha=0.5)
+
+    ax.set_title(f"Sample Trajectories ({args.maze_type})")
+    plt.savefig("dataset/sample_trajectories.png", dpi=150, bbox_inches="tight")
+    print("Saved visualization to dataset/sample_trajectories.png")
 
 
 if __name__ == "__main__":
