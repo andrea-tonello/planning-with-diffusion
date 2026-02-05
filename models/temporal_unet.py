@@ -6,6 +6,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+# HELPERS
+
 class Mish(nn.Module):
     # x * tanh(softplus(x))
     # preferred over ReLU in diffusion models because it is smoother and non-monotonic.
@@ -29,7 +31,6 @@ class SinusoidalPositionEmbeddings(nn.Module):
         - Low-frequency pairs encode coarse position
         - High-frequency pairs encode fine position
     """
-
     def __init__(self, dim):
         """ dim: embedding dimension (should be even) """
         super().__init__()
@@ -63,7 +64,6 @@ class SinusoidalPositionEmbeddings(nn.Module):
 
 class TimestepMLP(nn.Module):
     """MLP to project timestep embeddings to match hidden dimensions."""
-
     def __init__(self, embed_dim, hidden_dim):
         """
         - In:
@@ -83,7 +83,6 @@ class TimestepMLP(nn.Module):
 
 class Conv1dBlock(nn.Module):
     """Conv1d -> GroupNorm -> Mish"""
-
     def __init__(self, in_channels, out_channels, kernel_size=5, groups=8):
         super().__init__()
         self.conv = nn.Conv1d(in_channels, out_channels, kernel_size, padding=kernel_size // 2)
@@ -102,7 +101,6 @@ class ResidualTemporalBlock(nn.Module):
         + Timestep embedding added after first conv
         + Skip connection (with optional projection)
     """
-
     def __init__(self, in_channels, out_channels, embed_dim, kernel_size=5, groups=8):
         """
         - In:
@@ -151,25 +149,23 @@ class ResidualTemporalBlock(nn.Module):
 
 class Downsample1d(nn.Module):
     """Downsampling with strided convolution."""
-
     def __init__(self, channels):
         super().__init__()
         self.conv = nn.Conv1d(channels, channels, 3, stride=2, padding=1)
-
     def forward(self, x):
         return self.conv(x)
-
 
 class Upsample1d(nn.Module):
     """Upsampling with transposed convolution."""
-
     def __init__(self, channels):
         super().__init__()
         self.conv = nn.ConvTranspose1d(channels, channels, 4, stride=2, padding=1)
-
     def forward(self, x):
         return self.conv(x)
 
+
+
+# U-NET
 
 class TemporalUNet(nn.Module):
     """
