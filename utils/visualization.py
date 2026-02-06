@@ -49,7 +49,7 @@ def plot_maze(walls, start_region=None, goal_region=None, ax=None, figsize=(8, 8
     return ax
 
 
-def plot_trajectory(trajectory, state_dim=2, ax=None, show_endpoints=True, label=None):
+def plot_trajectory(trajectory, state_dim=2, ax=None, color="blue", alpha=0.7, show_endpoints=True, label=None):
     """
     - In:
         - trajectory: (horizon, transition_dim) or (transition_dim, horizon) array
@@ -75,13 +75,13 @@ def plot_trajectory(trajectory, state_dim=2, ax=None, show_endpoints=True, label
     positions = trajectory[:, :state_dim]
 
     # Plot trajectory line
-    ax.plot(positions[:, 0], positions[:, 1], color="blue", alpha=0.7, linewidth=1.5, label=label)
+    ax.plot(positions[:, 0], positions[:, 1], color=color, alpha=alpha, linewidth=1.5, label=label)
 
     if show_endpoints:
         # start (circle)
-        ax.scatter(positions[0, 0], positions[0, 1], c="blue", s=100, marker="o", edgecolors="black", zorder=5)
+        ax.scatter(positions[0, 0], positions[0, 1], c=color, s=100, marker="o", edgecolors="black", zorder=5)
         # end (star)
-        ax.scatter(positions[-1, 0], positions[-1, 1], c="blue", s=150, marker="*", edgecolors="black", zorder=5)
+        ax.scatter(positions[-1, 0], positions[-1, 1], c=color, s=150, marker="*", edgecolors="black", zorder=5)
 
     return ax
 
