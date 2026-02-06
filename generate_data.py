@@ -257,7 +257,7 @@ def main():
         traj = trajectories[i]  # (transition_dim, horizon)
         plot_trajectory(traj, state_dim=2, ax=ax, alpha=0.5)
 
-    ax.set_title(f"Sample Trajectories ({args.maze_type})")
+    ax.set_title(f"Sample trajectories ({args.maze_type})")
     plt.savefig("dataset/sample_trajectories.png", dpi=150, bbox_inches="tight")
     print("Saved visualization to dataset/sample_trajectories.png")
 
