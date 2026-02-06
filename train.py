@@ -28,7 +28,9 @@ def load_checkpoint(checkpoint_path, model, optimizer, device):
 
 
 def train(model, diffusion, dataset, num_epochs=100, batch_size=32, lr=2e-4, gradient_clip=1.0, 
-          checkpoint_dir="checkpoints", checkpoint_freq=10, resume_checkpoint=None, device=torch.device("cuda")):
+          checkpoint_dir="checkpoints", checkpoint_freq=10, resume_checkpoint=None, 
+          device=torch.device("cuda"), dim=32, dim_mults=[1, 2, 4]
+    ):
     """
     - In:
         - model: TemporalUNet model
@@ -99,6 +101,8 @@ def train(model, diffusion, dataset, num_epochs=100, batch_size=32, lr=2e-4, gra
                 "losses": losses,
                 "normalizer_mean": dataset.normalizer.mean,
                 "normalizer_std": dataset.normalizer.std,
+                "dim": dim,
+                "dim_mults": dim_mults,
             }
             torch.save(checkpoint, checkpoint_path / f"checkpoint_{epoch + 1}.pt")
             print(f"Saved checkpoint to {checkpoint_path / f'checkpoint_{epoch + 1}.pt'}")
@@ -109,6 +113,8 @@ def train(model, diffusion, dataset, num_epochs=100, batch_size=32, lr=2e-4, gra
         "normalizer_mean": dataset.normalizer.mean,
         "normalizer_std": dataset.normalizer.std,
         "losses": losses,
+        "dim": dim,
+        "dim_mults": dim_mults,
     }
     torch.save(final_checkpoint, checkpoint_path / "final_model.pt")
     print(f"Saved final model to {checkpoint_path / 'final_model.pt'}")
@@ -166,6 +172,8 @@ def main():
         checkpoint_freq=args.checkpoint_freq,
         resume_checkpoint=args.resume,
         device=device,
+        dim=args.dim,
+        dim_mults=[1, 2, 4]
     )
 
     # Train loss plotting
