@@ -10,7 +10,7 @@ from models.scheduler import CosineNoiseSchedule
 from models.gaussian_diffusion import GaussianDiffusion
 from utils.trajectory import DatasetNormalizer
 from maze2d import Maze2DEnv
-from utils.visualization import plot_maze, plot_trajectory
+from utils.visualization import plot_maze, plot_trajectory, plot_diffusion_process
 
 
 def load_model(checkpoint_path, device, diffusion_steps=100):
@@ -306,7 +306,7 @@ def evaluate(diffusion, normalizer, env, num_episodes=10, horizon=128, device=to
     start_region = None if random_goals else env.start_region
     goal_region = None if random_goals else env.goal_region
 
-    # Plot all trajectories on one map
+    # 1) Plot all trajectories on one map
     fig, ax = plt.subplots(figsize=(10, 10))
     plot_maze(env.walls, start_region, goal_region, ax=ax)
 
@@ -336,7 +336,8 @@ def evaluate(diffusion, normalizer, env, num_episodes=10, horizon=128, device=to
     plt.savefig(output_path / "all_trajectories.png", dpi=150, bbox_inches="tight")
     print(f"Saved trajectory visualization to {output_path / 'all_trajectories.png'}")
 
-    # Plot six individual examples
+
+    # 2) Plot six individual examples
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
     axes = axes.flatten()
 
@@ -372,6 +373,35 @@ def evaluate(diffusion, normalizer, env, num_episodes=10, horizon=128, device=to
     plt.tight_layout()
     plt.savefig(output_path / "individual_trajectories.png", dpi=150, bbox_inches="tight")
     print(f"Saved individual examples to {output_path / 'individual_trajectories.png'}")
+
+
+    # 3) Diffusion process visualization
+    # Use the first episode
+    _, start, goal, _ = all_trajectories[0]
+    start_norm = (start - normalizer.mean[:2]) / normalizer.std[:2]
+    goal_norm = (goal - normalizer.mean[:2]) / normalizer.std[:2]
+    start_tensor = torch.from_numpy(start_norm).float().to(device)
+    goal_tensor = torch.from_numpy(goal_norm).float().to(device)
+    # Plan with intermediates (single sample)
+    trajectory, intermediates = diffusion.plan(
+        start_state=start_tensor,
+        goal_state=goal_tensor,
+        horizon=horizon,
+        batch_size=1,
+        inpaint_boundary_steps=inpaint_boundary_steps,
+        return_intermediates=True,
+    )
+    # Unnormalize each intermediate: each is (1, horizon, transition_dim)
+    unnormed_intermediates = []
+    for inter in intermediates:
+        traj_np = inter[0].cpu().numpy()  # (horizon, transition_dim)
+        traj_np = normalizer.unnormalize(traj_np.T).T  # unnormalize expects (transition_dim, horizon)
+        unnormed_intermediates.append(traj_np)
+
+    fig = plot_diffusion_process(unnormed_intermediates, state_dim=2, num_steps=6, walls=env.walls)
+    fig.suptitle("Denoising process intermediate steps", y=1.02)
+    fig.savefig(output_path / "diffusion_process.png", dpi=150, bbox_inches="tight")
+    print(f"Saved diffusion process visualization to {output_path / 'diffusion_process.png'}")
 
     return metrics
 

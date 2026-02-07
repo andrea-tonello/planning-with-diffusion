@@ -101,7 +101,9 @@ class GaussianDiffusion(nn.Module):
         return mean + nonzero_mask * torch.sqrt(variance) * noise
 
     @torch.no_grad()
-    def p_sample_loop(self, shape, start_state=None, goal_state=None, device=torch.device("cpu"), inpaint_boundary_steps=4):
+    def p_sample_loop(self, shape, start_state=None, goal_state=None, device=torch.device("cpu"), 
+                      inpaint_boundary_steps=4, return_intermediates=False
+        ):
         """
         Main inference loop, reverse process. Generate trajectory from noise.
 
@@ -114,13 +116,19 @@ class GaussianDiffusion(nn.Module):
             - device: device to run on
             - inpaint_boundary_steps: number of timesteps at each boundary
               to apply soft inpainting
+            - return_intermediates: whether to return all intermediate steps 
+              (to visualize diffusion process)
         - Out:
             - (batch, transition_dim, horizon) generated trajectory
+              or list of trajectories if return_intermediates=True
+
         """
         batch_size, transition_dim, horizon = shape
 
         # Start from pure noise
         x = torch.randn(shape, device=device)
+
+        intermediates = [x.clone()] if return_intermediates else None
 
         # Reverse diffusion
         for i in tqdm(reversed(range(self.num_timesteps)), desc="Sampling", total=self.num_timesteps):
@@ -146,7 +154,12 @@ class GaussianDiffusion(nn.Module):
                 for k in range(1, min(inpaint_boundary_steps, horizon)):
                     weight = 1.0 - (k / inpaint_boundary_steps)
                     x[:, :self.state_dim, -(k + 1)] = weight * goal_state + (1 - weight) * x[:, :self.state_dim, -(k + 1)]
+            
+            if return_intermediates:
+                intermediates.append(x.clone())
 
+        if return_intermediates:
+            return x, intermediates
         return x
 
     def loss(self, x_0):
@@ -175,7 +188,8 @@ class GaussianDiffusion(nn.Module):
         return F.mse_loss(noise_pred, noise)
 
     @torch.no_grad()
-    def plan(self, start_state, goal_state, horizon=128, batch_size=1, inpaint_boundary_steps=4):
+    def plan(self, start_state, goal_state, horizon=128, batch_size=1, 
+             inpaint_boundary_steps=4, return_intermediates=False):
         """
         Generate a planned trajectory from start to goal.
 
@@ -186,8 +200,12 @@ class GaussianDiffusion(nn.Module):
             - batch_size: number of trajectories to sample
             - inpaint_boundary_steps: number of timesteps at each boundary
               to apply soft inpainting
+            - return_intermediates: whether to return all intermediate steps 
+              (to visualize diffusion process)
         - Out:
             - trajectory: (batch, horizon, transition_dim) planned trajectory
+            - intermediates (optional): list of (batch, horizon, transition_dim) tensors, 
+              one per denoising step
         """
         device = next(self.model.parameters()).device
 
@@ -210,7 +228,14 @@ class GaussianDiffusion(nn.Module):
             goal_state=goal_state,
             device=device,
             inpaint_boundary_steps=inpaint_boundary_steps,
+            return_intermediates=return_intermediates,
         )
+
+        if return_intermediates:
+            trajectory, intermediates = result
+            # Transpose each intermediate to (batch, horizon, transition_dim)
+            intermediates = [x.permute(0, 2, 1) for x in intermediates]
+            return trajectory.permute(0, 2, 1), intermediates
 
         # Transpose to (batch, horizon, transition_dim)
         return result.permute(0, 2, 1)
