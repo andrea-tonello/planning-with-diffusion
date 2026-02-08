@@ -409,7 +409,7 @@ def evaluate(diffusion, normalizer, env, num_episodes=10, horizon=128, device=to
 def main():
     parser = argparse.ArgumentParser(description="Evaluate Diffuser model")
     parser.add_argument("--checkpoint", type=str, default="checkpoints/final_model.pt")
-    parser.add_argument("--maze-type", type=str, default="umaze", choices=["umaze", "smaze", "simple"])
+    parser.add_argument("--maze-type", type=str, default="umaze", choices=["umaze", "umaze-inv", "smaze", "smaze-inv", "simple"])
     parser.add_argument("--num-episodes", type=int, default=10)
     parser.add_argument("--horizon", type=int, default=128)
     parser.add_argument("--diffusion-steps", type=int, default=100)

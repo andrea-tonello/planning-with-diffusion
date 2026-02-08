@@ -20,6 +20,19 @@ MAZE_CONFIGS = {
         "goal_region": (0.65, 0.6, 0.9, 0.9),  # top-right
     },
 
+    "umaze-inv": {  # Swapped start/goal. To be used during evaluation to test for generalization
+        "walls": [
+            (0.0, 0.0, 1.0, 0.0),
+            (0.0, 1.0, 1.0, 1.0),
+            (0.0, 0.0, 0.0, 1.0),
+            (1.0, 0.0, 1.0, 1.0),
+            (0.25, 0.5, 0.75, 0.5),
+            (0.5, 0.5, 0.5, 1.0),
+        ],
+        "start_region": (0.65, 0.6, 0.9, 0.9),
+        "goal_region": (0.1, 0.6, 0.35, 0.9),
+    },
+
     "smaze": {
         "walls": [
             (0.0, 0.0, 1.0, 0.0),  # bottom
@@ -32,6 +45,20 @@ MAZE_CONFIGS = {
         ],
         "start_region": (0.80, 0.67, 1.0, 1.0),
         "goal_region": (0.0, 0.0, 0.20, 0.33),
+    },
+
+    "smaze-inv": {  # Swapped start/goal. To be used during evaluation to test for generalization
+        "walls": [
+            (0.0, 0.0, 1.0, 0.0),
+            (0.0, 1.0, 1.0, 1.0),
+            (0.0, 0.0, 0.0, 1.0),
+            (1.0, 0.0, 1.0, 1.0),
+
+            (0.30, 0.67, 1.0, 0.67),
+            (0.0, 0.33, 0.70, 0.33),
+        ],
+        "start_region": (0.0, 0.0, 0.20, 0.33),
+        "goal_region": (0.80, 0.67, 1.0, 1.0),
     },
 
     "simple": {
