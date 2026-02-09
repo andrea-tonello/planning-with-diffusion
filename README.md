@@ -1,5 +1,8 @@
-# Installation and usage
-## Built with python 3.11
+# Using Diffusion models to solve Planning and Trajectory Optimization problems
+Project for Probabilistic Machine Learning course at University of Trieste.
+Check the presentation for details.
+
+# Installation and usage - built with python 3.11
 
 ### With `pip`
 - Clone the repo
