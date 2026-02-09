@@ -22,4 +22,4 @@ Check the presentation for details.
   - (Optional) Train with `uv run train.py`
   - Evaluate model/s with `uv run evaluate.py`
 
-*Model weights are already saved in the repo. However, it is possibile to re-train the models if you need it, using the main.ipynb notebook.*
+*Model weights are already saved in the repo. However, it is possibile to generate new dataset/s and re-train the model if you need it, using generate_data.py and train.py.*
