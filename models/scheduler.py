@@ -58,8 +58,6 @@ class CosineNoiseSchedule:
 
         # For computing mean of reverse process
         sqrt_recip_alphas = torch.sqrt(1.0 / alphas)
-        #posterior_mean_coef1 = betas * torch.sqrt(alphas_cumprod_prev) / (1.0 - alphas_cumprod)
-        #posterior_mean_coef2 = (1.0 - alphas_cumprod_prev) * torch.sqrt(alphas) / (1.0 - alphas_cumprod)
 
         # Store as float32 tensors
         self.betas = betas.float()
@@ -71,8 +69,6 @@ class CosineNoiseSchedule:
         self.posterior_variance = posterior_variance.float()
         self.posterior_log_variance_clipped = torch.log(posterior_variance.clamp(min=1e-20)).float()
         self.sqrt_recip_alphas = sqrt_recip_alphas.float()
-        #self.posterior_mean_coef1 = posterior_mean_coef1.float()
-        #self.posterior_mean_coef2 = posterior_mean_coef2.float()
 
     def _alpha_bar_fn(self, t):
         """Compute alpha_bar using cosine schedule."""

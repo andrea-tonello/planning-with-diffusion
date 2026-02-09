@@ -20,10 +20,10 @@ class GaussianDiffusion(nn.Module):
     def __init__(self, model, schedule, state_dim=2, action_dim=2):
         """
         - In:
-            - model: Denoising network (TemporalUNet)
-            - schedule: Noise schedule
-            - state_dim: Dimension of state space
-            - action_dim: Dimension of action space
+            - model: denoising network (TemporalUNet)
+            - schedule: noise schedule
+            - state_dim: dimension of state space
+            - action_dim: dimension of action space
         """
         super().__init__()
         self.model = model

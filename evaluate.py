@@ -417,7 +417,7 @@ def main():
     parser.add_argument("--device", type=str, default="auto")
     parser.add_argument("--use-executed-endpoint", action="store_true",
                         help="Measure success from executed (not planned) endpoint")
-    parser.add_argument("--inpaint-boundary-steps", type=int, default=4,
+    parser.add_argument("--inpaint-boundary-steps", type=int, default=8,
                         help="Timesteps at each boundary for soft inpainting (default: 4)")
     parser.add_argument("--random-goals", action="store_true",
                         help="Sample start/goal from anywhere in maze (tests generalization)")
